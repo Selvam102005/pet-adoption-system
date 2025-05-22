@@ -1,0 +1,34 @@
+.adopt-btn{
+    background-color: #ff80ab;
+    border-color: black;
+    color: black;
+  }
+    
+  .about-btn{
+    background-color: #ff80ab;
+    border-color: black;
+    color: black;
+
+  }
+
+  .about-btn:hover{
+    background-color: #ff3779;
+  }
+
+  .adopt-btn:hover{
+    background-color: #ff3779;
+    
+  }
+
+  .logout-btn{
+    background-color: #000000;
+    border-color: rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
+
+  }
+
+  
+  .logout-btn:hover{
+    background-color: #c2486f;
+    
+  }

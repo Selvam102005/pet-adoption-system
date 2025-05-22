@@ -1,0 +1,51 @@
+/* PetAdoptionForm.css */
+
+/* Form container */
+.form-container {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  /* border: 1px solid #ccc;
+  border-radius: 8px; */
+  background-color: transparent;
+}
+
+/* Section headers */
+h2, h3 {
+  margin-top: 20px;
+}
+
+/* Checkbox styling */
+.form-check {
+  margin-top: 10px;
+}
+
+/* Submit button */
+.submit-btn {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 18px;
+  font-size: 16px;
+  font-family: inherit;
+  box-shadow: 0 0 0 1px #14A44D;
+  border: none;
+  border-radius: 25px;
+  background-color: #dae9e0;
+  transition: all .3s;
+}
+
+.input::placeholder {
+  color:#000000;
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 10px 1px #14A44D;
+  border: none;
+  transition: all .3s;
+}

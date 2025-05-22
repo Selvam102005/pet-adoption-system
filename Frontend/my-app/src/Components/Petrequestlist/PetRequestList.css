@@ -1,0 +1,169 @@
+              .request-list-container {
+          padding: 2rem;
+          max-width: 1200px;
+          margin: 2rem auto;
+          font-family: 'Inter', sans-serif; /* Using a common sans-serif font */
+          background-color: #f9fafb; /* Light gray background for the container */
+          border-radius: 0.75rem; /* Rounded corners for the container */
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Subtle shadow */
+        }
+
+        .request-list-title {
+          color: #1f2937; /* Darker gray for title */
+          margin-bottom: 1.5rem;
+          font-size: 1.875rem; /* Larger title */
+          font-weight: 700; /* Bolder title */
+          text-align: center;
+        }
+
+        .table-responsive-container {
+          background: white;
+          border-radius: 0.5rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0,0,0,0.03); /* Softer shadow for table container */
+          overflow-x: auto; /* Allows table to scroll horizontally on small screens */
+        }
+
+        .request-table {
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 600px; /* Minimum width to prevent excessive squishing */
+        }
+
+        .request-table th {
+          background-color: #4f46e5; /* Indigo background for headers */
+          color: white;
+          padding: 0.75rem 1rem; /* Adjusted padding */
+          text-align: left;
+          font-weight: 600; /* Medium-bold headers */
+          font-size: 0.875rem; /* Slightly smaller header font */
+          text-transform: uppercase; /* Uppercase headers */
+          letter-spacing: 0.05em;
+        }
+
+        .request-table td {
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid #e5e7eb; /* Lighter gray border */
+          color: #374151; /* Medium gray for table data */
+          font-size: 0.875rem;
+        }
+
+        .request-table tr:last-child td {
+          border-bottom: none;
+        }
+
+        .request-table tr:hover {
+          background-color: #f3f4f6; /* Very light gray on hover */
+        }
+
+        .status-badge {
+          padding: 0.3rem 0.75rem;
+          border-radius: 9999px; /* Pill shape */
+          font-size: 0.75rem;
+          font-weight: 600; /* Bolder badge text */
+          text-transform: capitalize;
+          display: inline-block; /* Ensures padding and background apply correctly */
+        }
+
+        .status-pending {
+          background-color: #fef3c7; /* Lighter yellow */
+          color: #92400e; /* Darker amber */
+        }
+
+        .status-approved {
+          background-color: #d1fae5; /* Lighter green */
+          color: #065f46; /* Darker green */
+        }
+
+        .status-declined {
+          background-color: #fee2e2; /* Lighter red */
+          color: #991b1b; /* Darker red */
+        }
+
+        .action-buttons-cell {
+          display: flex;
+          gap: 0.75rem; /* Increased gap */
+          align-items: center; /* Vertically align items if they wrap */
+        }
+
+        .action-button {
+          padding: 0.6rem 1.2rem; /* Slightly larger buttons */
+          border-radius: 0.375rem;
+          font-size: 0.875rem;
+          font-weight: 600; /* Bolder button text */
+          cursor: pointer;
+          transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+          border: none;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Subtle shadow on buttons */
+        }
+        .action-button:active {
+            transform: translateY(1px); /* Slight press effect */
+        }
+
+
+        .approve-button {
+          background-color: #10b981; /* Emerald green */
+          color: white;
+        }
+
+        .approve-button:hover {
+          background-color: #059669; /* Darker emerald */
+        }
+
+        .decline-button {
+          background-color: #ef4444; /* Red */
+          color: white;
+        }
+
+        .decline-button:hover {
+          background-color: #dc2626; /* Darker red */
+        }
+        
+        .action-completed-text {
+          padding: 0.5rem 1rem;
+          border-radius: 0.375rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #4b5563; /* Gray text for completed actions */
+          font-style: italic;
+          background-color: #e5e7eb; /* Light gray background for completed text */
+        }
+
+        .loading-message, .error-message, .no-requests-message {
+          text-align: center;
+          padding: 3rem 1rem; /* More padding */
+          font-size: 1.125rem; /* Slightly larger text */
+          color: #4b5563; /* Medium gray */
+          border-radius: 0.5rem;
+          background-color: white;
+          margin: 2rem auto;
+          max-width: 600px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .error-message {
+          color: #b91c1c; /* Darker red for errors */
+          background-color: #fee2e2; /* Light red background for errors */
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+          .request-list-container {
+            padding: 1rem;
+          }
+          .request-list-title {
+            font-size: 1.5rem;
+          }
+          .request-table th, .request-table td {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+          }
+          .action-button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+          }
+          .action-buttons-cell {
+            flex-direction: column; /* Stack buttons vertically on small screens */
+            align-items: flex-start;
+          }
+        }
+      

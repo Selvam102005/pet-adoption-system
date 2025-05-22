@@ -1,0 +1,47 @@
+.pet-list-container {
+  margin-top: 20px;
+}
+
+.pet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 20px;
+}
+
+.pet-card {
+  margin-bottom: 20px;
+  transition: transform 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  border: 2px solid transparent;
+  animation: fadeInUp 0.5s ease-in-out;
+}
+
+.pet-card:hover {
+  transform: scale(1.05);
+  animation: none; /* Disable fadeInUp animation on hover */
+  border-color: #b34c6f; /* Initial hover border color */
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Border color change animation */
+@keyframes borderColorChange {
+  0% {
+    border-color: transparent;
+  }
+  100% {
+    border-color: #ff6d9e; /* Final hover border color */
+  }
+}
+
+.pet-card:hover {
+  animation: borderColorChange 0.3s forwards; /* Apply borderColorChange animation on hover */
+}

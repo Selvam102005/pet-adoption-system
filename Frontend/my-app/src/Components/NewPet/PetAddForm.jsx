@@ -4,7 +4,6 @@ import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import axios from 'axios';
 import '../NewPet/PetAddFormStyle.css';
-import Navigationbar from '../Navigationbar';
 
 function PetAddForm() {
   const [formData, setFormData] = useState({
@@ -74,7 +73,6 @@ function PetAddForm() {
 
   return (
     <>
-      <Navigationbar />
       <div className="form-container">
         {alert.show && <Alert variant={alert.variant}>{alert.message}</Alert>}
         <Form onSubmit={handleSubmit}>

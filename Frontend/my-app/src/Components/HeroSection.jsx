@@ -39,17 +39,6 @@ const HeroSection = () => {
             discover local pet resources. PetPals Connect is here to help you
             find and care for your new furry friend!
           </p>
-          <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-            <Button
-              style={{ width: "200px" }}
-              className="px-4 me-md-2"
-              id="gen-btn"
-              variant="outline-success"
-              onClick={handleClick}
-            >
-              Adopt Me
-            </Button>
-          </div>
         </Col>
       </Row>
     </Container>

@@ -6,6 +6,7 @@ import { GrUpdate } from "react-icons/gr";
 import PetModal from "../Modal/PetModal";
 import UpdatePetModal from "./UpdatePetModal";
 import { useNavigate } from "react-router-dom";
+import Navigationbar from "../Navigationbar";
 import './styles.css'
 const Pets = () => {
   const [pets, setPets] = useState([]);
@@ -60,6 +61,7 @@ const Pets = () => {
 
   return (
     <>
+      <Navigationbar />
       <h1 style={{ textAlign: 'center' }}>Available Pets</h1>
       <div className="cards">
         {pets.map((pet) => (

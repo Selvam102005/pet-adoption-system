@@ -64,6 +64,7 @@ const AdminHome = () => {
   }
 
   return (
+    <>
     <div className="admin-home">
       <h1>Welcome back, {username || 'Admin'}!</h1>
       <div className="stats-container">
@@ -77,6 +78,7 @@ const AdminHome = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

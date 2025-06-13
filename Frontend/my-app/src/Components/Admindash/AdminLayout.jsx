@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import Navigationbar from "../Navigationbar";
 import './AdminLayout.css';
 
 const AdminLayout = () => {
@@ -12,6 +13,8 @@ const AdminLayout = () => {
   };
 
   return (
+    <>
+    <Navigationbar />
     <div className="admin-container">
       {/* Sidebar */}
       <div className="admin-sidebar">
@@ -45,6 +48,7 @@ const AdminLayout = () => {
         <Outlet />
       </div>
     </div>
+    </>
   );
 };
 

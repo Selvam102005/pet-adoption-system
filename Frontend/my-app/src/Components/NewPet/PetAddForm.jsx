@@ -9,6 +9,7 @@ import Navigationbar from "../Navigationbar";
 function PetAddForm() {
   const [formData, setFormData] = useState({
     petName: '',
+    type: '',
     breed: '',
     species: '',
     age: '',
@@ -38,7 +39,6 @@ function PetAddForm() {
     e.preventDefault();
     setIsLoading(true);
     setAlert({ show: false, message: '', variant: '' });
-
     try {
       const response = await axios.post('http://localhost:8000/api/pets', formData, {
         headers: {
@@ -57,6 +57,7 @@ function PetAddForm() {
   const clearForm = () => {
     setFormData({
       petName: '',
+      type: '',
       breed: '',
       species: '',
       age: '',
@@ -87,6 +88,18 @@ function PetAddForm() {
               name="petName"
               placeholder="Enter Name"
               value={formData.petName}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Type</Form.Label>
+            <Form.Control
+              type="text"
+              className="input"
+              name="type"
+              placeholder="Enter Type"
+              value={formData.type}
               onChange={handleChange}
               required
             />

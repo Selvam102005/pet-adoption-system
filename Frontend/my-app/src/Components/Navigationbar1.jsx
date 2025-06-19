@@ -28,7 +28,7 @@ const Navigationbar1 = () => {
           </Dropdown.Toggle>
           <Dropdown.Menu className="dropdown-content">
             {pets
-              .filter((pet) => pet.species === "Dog")
+              .filter((pet) => pet.type === "Dog")
               .map((data) => (
                 <Dropdown.Item
                   key={data._id}
@@ -49,7 +49,7 @@ const Navigationbar1 = () => {
           </Dropdown.Toggle>
           <Dropdown.Menu className="dropdown-content">
             {pets
-              .filter((pet) => pet.species === "Cat")
+              .filter((pet) => pet.type === "Cat")
               .map((data) => (
                 <Dropdown.Item
                   key={data._id}

@@ -38,7 +38,7 @@ const DogDetails = () => {
         <Row>
           {dogData.map((data) => {
             return (
-              data.species === "Dog" && (
+              data.type === "Dog" && (
                 <div ref={el => (dogRefs.current[data._id] = el)} key={data._id}>
                   <Dogcard
                     dogs={data}

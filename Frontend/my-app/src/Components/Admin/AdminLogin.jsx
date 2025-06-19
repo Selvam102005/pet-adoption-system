@@ -59,17 +59,16 @@ const AdminLogin = () => {
       );
       
       if (response.data.success) {
-        // Store admin info in localStorage
-        localStorage.setItem("admin", JSON.stringify(response.data.admin));
-        
-        // Redirect to admin dashboard
-        navigate("/Admindash");
+       const { id, name, email } = response.data.admin;
+       localStorage.setItem("admin", JSON.stringify({ id, name, email }));
+
+      navigate("/Admindash");
       } else {
-        setAlert({
-          show: true,
-          message: "Invalid admin credentials!",
-          variant: "danger",
-        });
+           setAlert({
+           show: true,
+           message: "Invalid admin credentials!",
+           variant: "danger",
+           });
       }
     } catch (error) {
       console.error("Error during admin login:", error);
@@ -98,11 +97,48 @@ const AdminLogin = () => {
     setIsLoading(true);
     setAlert({ show: false, message: "", variant: "" });
 
-    // Validate inputs
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setAlert({
         show: true,
         message: "All fields are required!",
+        variant: "danger",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    const password = formData.password;
+    if (password.length < 8) {
+      setAlert({
+        show: true,
+        message: "Password must be at least 8 characters long!",
+        variant: "danger",
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setAlert({
+        show: true,
+        message: "Password must contain at least one uppercase letter!",
+        variant: "danger",
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (!/\d/.test(password)) {
+      setAlert({
+        show: true,
+        message: "Password must contain at least one number!",
+        variant: "danger",
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (!/[!@#$%^&*()_+]/.test(password)) {
+      setAlert({
+        show: true,
+        message: "Password must contain at least one special character (!@#$%^&*()_+).",
         variant: "danger",
       });
       setIsLoading(false);
@@ -118,15 +154,7 @@ const AdminLogin = () => {
       setIsLoading(false);
       return;
     }
-    if (formData.password.length < 8) {
-      setAlert({
-        show: true,
-        message: "Password must be at least 8 characters long!",
-        variant: "danger",
-      });
-      setIsLoading(false);
-      return;
-    }
+
     try {
       const response = await axios.post(
         "http://localhost:8000/api/admin/register",

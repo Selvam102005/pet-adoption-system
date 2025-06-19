@@ -5,6 +5,7 @@ import AdminHome from './AdminHome';
 import PetAddForm from '../NewPet/PetAddForm';
 import ViewPetDetails from '../AllDetails/Pets';
 import PetRequestList from '../Petrequestlist/Petrequestlist';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AdminDashboard = () => {
   return (

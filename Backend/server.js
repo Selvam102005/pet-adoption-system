@@ -20,21 +20,26 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/api/users', async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    
+
     if (!username || !email || !password) {
       return res.status(400).json({ success: false, error: 'All fields are required' });
     }
-    const existingUser = await Users.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ success: false, error: 'User already exists with this email' });
+
+    const existingUsername = await Users.findOne({ username });
+    const existingEmail = await Users.findOne({ email });
+
+    let errorMessages = [];
+
+    if (existingUsername) errorMessages.push("Username already taken");
+    if (existingEmail) errorMessages.push("Email already registered");
+
+    if (errorMessages.length > 0) {
+      return res.status(400).json({ success: false, error: errorMessages.join(" and ") });
     }
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(password, salt);
-    const newUser = new Users({
-      username,
-      email,
-      password: hash
-    });
+
+    const newUser = new Users({ username, email, password: hash });
     const savedUser = await newUser.save();
     res.status(201).json({ success: true, user: savedUser });
   } catch (err) {
@@ -71,26 +76,29 @@ app.post('/api/users/login', async (req, res) => {
 app.post('/api/admin/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    
+
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
-    const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin) {
-      return res.status(400).json({ success: false, message: 'Admin already exists with this email' });
+
+    const existingAdminEmail = await Admin.findOne({ email });
+    const existingAdminName = await Admin.findOne({ name });
+
+    const errorMessages = [];
+    if (existingAdminName) errorMessages.push("Name already taken");
+    if (existingAdminEmail) errorMessages.push("Email already registered");
+
+    if (errorMessages.length > 0) {
+      return res.status(400).json({ success: false, message: errorMessages.join(" and ") });
     }
     const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const newAdmin = new Admin({
-      username: name, 
-      email,
-      password: hashedPassword
-    });
+    const newAdmin = new Admin({ name, email, password: hashedPassword });
     const savedAdmin = await newAdmin.save();
     const adminResponse = {
       id: savedAdmin._id,
-      username: savedAdmin.username,
-      email: savedAdmin.email
+      name: savedAdmin.name,
+      email: savedAdmin.email,
     };
     res.status(201).json({ success: true, admin: adminResponse, message: 'Admin registered successfully' });
   } catch (err) {
@@ -98,6 +106,7 @@ app.post('/api/admin/register', async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error. Please try again.' });
   }
 });
+
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -113,7 +122,7 @@ app.post('/api/admin/login', async (req, res) => {
       success: true, 
       admin: {
         id: admin._id,
-        username: admin.username,
+        name: admin.name,
         email: admin.email
       } 
     });

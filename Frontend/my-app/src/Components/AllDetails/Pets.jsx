@@ -5,16 +5,18 @@ import { MdDeleteOutline } from "react-icons/md";
 import { GrUpdate } from "react-icons/gr";
 import PetModal from "../Modal/PetModal";
 import UpdatePetModal from "./UpdatePetModal";
-import { useNavigate } from "react-router-dom";
 import Navigationbar from "../Navigationbar";
-import './styles.css'
+import ConfirmModal from "../ConfirmPage/ConfirmModal"; 
+import './styles.css';
+
 const Pets = () => {
   const [pets, setPets] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
   const [updatePet, setUpdatePet] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const navigate = useNavigate();
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const handleShow = (pet) => {
     setSelectedPet(pet);
@@ -26,6 +28,8 @@ const Pets = () => {
     setShowModal(false);
     setUpdatePet(null);
     setShowUpdateModal(false);
+    setConfirmDeleteId(null);
+    setShowConfirmModal(false);
   };
 
   useEffect(() => {
@@ -35,18 +39,25 @@ const Pets = () => {
       .catch((error) => console.error(error));
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDeleteClick = (id) => {
+    setConfirmDeleteId(id);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/pets/delete/${id}`, {
+      const response = await fetch(`http://localhost:8000/api/pets/delete/${confirmDeleteId}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete Pet');
-      }
-      setPets(pets.filter(pet => pet._id !== id));
+      if (!response.ok) throw new Error('Failed to delete pet');
+
+      setPets(pets.filter(pet => pet._id !== confirmDeleteId));
     } catch (error) {
       console.error('Error deleting Pet:', error);
+    } finally {
+      setShowConfirmModal(false);
+      setConfirmDeleteId(null);
     }
   };
 
@@ -54,11 +65,6 @@ const Pets = () => {
     setUpdatePet(pet);
     setShowUpdateModal(true);
   };
-
-  const handleAdoptClick = () => {
-    navigate("/adopt");
-  };
-
   return (
     <>
       <Navigationbar />
@@ -97,11 +103,10 @@ const Pets = () => {
                   <Button
                     variant="outline-danger"
                     className="m-2"
-                    onClick={() => handleDelete(pet._id)}
+                    onClick={() => handleDeleteClick(pet._id)}
                   >
                     <MdDeleteOutline size={24} />
                   </Button>
-                  
                   <Button
                     className="about-btn m-2"
                     onClick={() => handleShow(pet)}
@@ -125,6 +130,13 @@ const Pets = () => {
           onUpdate={handleUpdate}
         />
       )}
+      <ConfirmModal
+        show={showConfirmModal}
+        onHide={handleClose}
+        onConfirm={handleConfirmDelete}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this pet?"
+      />
     </>
   );
 };

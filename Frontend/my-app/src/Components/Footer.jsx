@@ -34,15 +34,15 @@ export default function Footer() {
               </p>
               <p>
                 <MDBIcon style={{color:"#fcfcfc"}} icon="envelope" className="me-3" />
-                naveengoogle2006@gmail.com
+                Sachin@102005gmail.com
               </p>
               <p>
-                <MDBIcon style={{color:"#fcfcfc"}} icon="phone" className="me-3" /> + 91
-                8838107424
+                <MDBIcon style={{color:"#fcfcfc"}} icon="phone" className="me-3" />
+                + 91 8838107424
               </p>
               <p>
-                <MDBIcon style={{color:"#fcfcfc"}} icon="print" className="me-3" /> + 91
-                7550262403
+                <MDBIcon style={{color:"#fcfcfc"}} icon="print" className="me-3" /> 
+                + 91 7550262403
               </p>
             </MDBCol>
           </MDBRow>

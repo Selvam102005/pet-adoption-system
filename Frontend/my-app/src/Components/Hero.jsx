@@ -1,45 +1,44 @@
-import React from "react";
-import { Card, Carousel } from "react-bootstrap";
+import { Card } from "react-bootstrap";
 
 const Hero = () => {
   return (
-    <div className="my-5 position-relative p-5 text-center text-muted">
-      {/* Carousel */}
-      <Carousel controls={false} indicators={false} style={{ height: "300px", width: "100%" }} className="mt-1">
-        <Carousel.Item interval={2500}>
-          <img
-            src="https://i.pinimg.com/564x/30/6b/20/306b20828bd03a2f36a85d8fe99ff3ce.jpg"
-            className="d-block w-100 h-100"
-            alt="Carousel Item 1"
-            style={{ maxHeight: "300px" }}
-          />
-        </Carousel.Item>
-        <Carousel.Item interval={2500}>
-          <img
-            src="https://i.pinimg.com/564x/fa/ed/5c/faed5cd36e9d7622ad2d640b7a0d61cc.jpg"
-            className="d-block w-100"
-            alt="Carousel Item 2"
-            style={{ maxHeight: "300px" }}
-          />
-        </Carousel.Item>
-        <Carousel.Item interval={2500}>
-          <img
-            src="https://i.pinimg.com/564x/06/ca/98/06ca985e66acefc2b0d35745ea27691c.jpg"
-            className="d-block w-100"
-            alt="Carousel Item 3"
-            style={{ maxHeight: "300px" }}
-          />
-        </Carousel.Item>
-      </Carousel>
+    <>
+      <style>{`
+        .hero-section {
+          background: linear-gradient(135deg,rgb(250, 13, 84),rgb(254, 251, 251));
+          padding: 60px 20px;
+          border-radius: 20px;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+          text-align: center;
+          margin: 40px auto;
+          max-width: 900px;
+        }
 
-      {/* Card with Quote */}
-      <Card.Title className="text-body-emphasis mt-4">
-        "Saving one animal may not change the world, but for that one animal, the world changes forever."
-      </Card.Title>
-      <Card.Text className="col-lg-6 mx-auto mb-4">
-        ~ Charles Henderson
-      </Card.Text>
-    </div>
+        .hero-title {
+          color:rgb(111, 8, 42);
+          font-size: 1.75rem;
+          font-weight: bold;
+          margin-bottom: 1rem;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .hero-quote {
+          color:rgb(56, 3, 24);
+          font-size: 1.1rem;
+          font-style: italic;
+          font-weight: 500;
+        }
+      `}</style>
+
+      <div className="hero-section">
+        <Card.Title className="hero-title">
+          "Saving one animal may not change the world, but for that one animal, the world changes forever."
+        </Card.Title>
+        <Card.Text className="hero-quote">
+          ~ Charles Henderson
+        </Card.Text>
+      </div>
+    </>
   );
 };
 

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Dropdown from "react-bootstrap/Dropdown";
 import Nav from "react-bootstrap/Nav";
 import axios from "axios";
-import './NavigationBar1style.css';  // Import the CSS file
+import './NavigationBar1style.css';
 
 const Navigationbar1 = () => {
   const [pets, setPets] = useState([]);

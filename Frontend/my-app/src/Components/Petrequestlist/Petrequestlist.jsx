@@ -13,7 +13,6 @@ const PetRequestList = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmConfig, setConfirmConfig] = useState({
     id: null,
-    action: '',
     petName: '',
   });
 
@@ -40,37 +39,34 @@ const PetRequestList = () => {
       });
   };
 
-  const handleRequestAction = (id, action, petsname) => {
-    setConfirmConfig({ id, action, petName: petsname || 'this pet' });
+  const handleRequestDelete = (id, petsname) => {
+    setConfirmConfig({ id, petName: petsname || 'this pet' });
     setShowConfirmModal(true);
   };
 
   const handleConfirmAction = async () => {
-    const { id, action, petName } = confirmConfig;
-    const actionVerb = action === 'approve' ? 'Approve' : 'Decline';
-    const successMsg = action === 'approve' ? 'Request Approved!' : 'Request Declined!';
-    const variant = action === 'approve' ? 'success' : 'danger';
+    const { id, petName } = confirmConfig;
 
     try {
       await axios.delete(`http://localhost:8000/api/adopts/${id}`);
       setRequests((prev) => prev.filter((req) => req._id !== id));
       setInfo({
-        title: successMsg,
-        message: `${actionVerb}d the request for ${petName}.`,
-        variant: variant,
+        title: 'Request Deleted',
+        message: `The adoption request for ${petName} has been deleted.`,
+        variant: 'danger',
       });
       setShowInfoModal(true);
     } catch (err) {
-      console.error(`Failed to ${actionVerb} request:`, err);
+      console.error('Failed to delete request:', err);
       setInfo({
         title: 'Error',
-        message: `Failed to ${actionVerb.toLowerCase()} request. Please try again.`,
+        message: 'Failed to delete request. Please try again.',
         variant: 'danger',
       });
       setShowInfoModal(true);
     } finally {
       setShowConfirmModal(false);
-      setConfirmConfig({ id: null, action: '', petName: '' });
+      setConfirmConfig({ id: null, petName: '' });
     }
   };
 
@@ -79,16 +75,8 @@ const PetRequestList = () => {
   if (requests.length === 0) return <><Navigationbar /><div className="no-requests-message">No adoption requests found.</div></>;
 
   return (
-  <>
-    <Navigationbar />
-
-    {loading ? (
-      <div className="loading-message">Loading requests...</div>
-    ) : error ? (
-      <div className="error-message">{error}</div>
-    ) : requests.length === 0 ? (
-      <div className="no-requests-message">No adoption requests found.</div>
-    ) : (
+    <>
+      <Navigationbar />
       <div className="request-list-container">
         <h2 className="request-list-title">Adoption Requests</h2>
         <div className="table-responsive-container">
@@ -99,7 +87,7 @@ const PetRequestList = () => {
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Status</th>
+                <th>Address</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -110,23 +98,13 @@ const PetRequestList = () => {
                   <td>{request.fullName || "-"}</td>
                   <td>{request.email || "-"}</td>
                   <td>{request.phone || "-"}</td>
-                  <td>
-                    <span className={`status-badge status-${request.status || 'pending'}`}>
-                      {request.status || 'Pending'}
-                    </span>
-                  </td>
+                  <td>{request.address || "-"}</td>
                   <td className="action-buttons-cell">
                     <button
-                      className="action-button approve-button"
-                      onClick={() => handleRequestAction(request._id, 'approve', request.petsname)}
+                      className="action-button delete-button"
+                      onClick={() => handleRequestDelete(request._id, request.petsname)}
                     >
-                      Approve
-                    </button>
-                    <button
-                      className="action-button decline-button"
-                      onClick={() => handleRequestAction(request._id, 'decline', request.petsname)}
-                    >
-                      Decline
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -135,27 +113,26 @@ const PetRequestList = () => {
           </table>
         </div>
       </div>
-    )}
 
-    {/* Confirm Modal (Always Rendered) */}
-    <ConfirmModal
-      show={showConfirmModal}
-      onHide={() => setShowConfirmModal(false)}
-      onConfirm={handleConfirmAction}
-      title={`Confirm ${confirmConfig.action === 'approve' ? 'Approval' : 'Decline'}`}
-      message={`Are you sure you want to ${confirmConfig.action} the request for "${confirmConfig.petName}"?`}
-    />
+      {/* Confirm Modal */}
+      <ConfirmModal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmAction}
+        title="Confirm Delete"
+        message={`Are you sure you want to delete the request for "${confirmConfig.petName}"?`}
+      />
 
-    {/* Info Modal (Always Rendered) */}
-    <InfoModal
-      show={showInfoModal}
-      onHide={() => setShowInfoModal(false)}
-      title={info.title}
-      message={info.message}
-      variant={info.variant}
-    />
-  </>
-);
+      {/* Info Modal */}
+      <InfoModal
+        show={showInfoModal}
+        onHide={() => setShowInfoModal(false)}
+        title={info.title}
+        message={info.message}
+        variant={info.variant}
+      />
+    </>
+  );
 };
 
 export default PetRequestList;

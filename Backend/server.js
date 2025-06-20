@@ -179,10 +179,23 @@ app.post('/api/adopts', async (req, res) => {
 
     // Email setup
     const mailOptions = {
-      from: 'selvam.s11102005@gmail.com',  // ✅ make sure this matches your transporter
+      from: 'selvam.s11102005@gmail.com',  
       to: data.email,
-      subject: 'Adoption Request Received',
-      text: `Hi ${data.fullName},\n\nYour adoption request for ${data.petsname} has been received.\nWe will get back to you within 24 hours.\n\nThank you!\nPet Adoption Team`
+      subject: 'Adoption Request Received – Pet Adoption Team',
+      text: `Hi ${data.fullName},
+
+             Thank you for submitting your adoption request for ${data.petsname}.
+
+             We’ve received your request and our team will review it shortly. You can expect a response within 24 hours.
+
+             If you have any questions in the meantime, feel free to contact us:
+
+             📍 Location: Chennai, Tamil Nadu  
+             📧 Email: sachin@102005gmail.com  
+             📞 Phone: +91 8838107424  
+             📠 Fax: +91 7550262403  
+
+             Warm regards,  Pet Adoption Team`
     };
 
     // Send the email

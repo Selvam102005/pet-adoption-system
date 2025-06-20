@@ -137,6 +137,8 @@ function AdoptForm() {
             type="text"
             name="gender"
             className="input"
+            placeholder="Enter Gender"
+            autoComplete="off"
             value={formData.gender}
             onChange={handleChange}
           />

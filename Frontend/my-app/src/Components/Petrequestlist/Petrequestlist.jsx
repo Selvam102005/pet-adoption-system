@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import './PetRequestList.css';
 import Navigationbar from "../Navigationbar";
+import ConfirmModal from "../ConfirmPage/ConfirmModal";
+import InfoModal from "../InfoModal/InfoModal";
 
 const PetRequestList = () => {
   const [requests, setRequests] = useState([]);
@@ -9,9 +11,14 @@ const PetRequestList = () => {
   const [error, setError] = useState(null);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [actionToConfirm, setActionToConfirm] = useState(null);
-  const [requestIdToConfirm, setRequestIdToConfirm] = useState(null);
-  const [petNameForModal, setPetNameForModal] = useState('');
+  const [confirmConfig, setConfirmConfig] = useState({
+    id: null,
+    action: '',
+    petName: '',
+  });
+
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [info, setInfo] = useState({ title: '', message: '', variant: 'primary' });
 
   useEffect(() => {
     fetchRequests();
@@ -28,75 +35,60 @@ const PetRequestList = () => {
       })
       .catch((err) => {
         console.error("Error fetching requests:", err);
-        setError("Failed to fetch requests. Please check the console for details.");
+        setError("Failed to fetch requests. Please check the console.");
         setLoading(false);
       });
   };
 
   const handleRequestAction = (id, action, petsname) => {
+    setConfirmConfig({ id, action, petName: petsname || 'this pet' });
     setShowConfirmModal(true);
-    setActionToConfirm(action);
-    setRequestIdToConfirm(id);
-    setPetNameForModal(petsname || 'this pet');
   };
 
   const handleConfirmAction = async () => {
-    const actionVerb = actionToConfirm === 'approved' ? 'approve' : 'decline';
-    const successMessage = actionToConfirm === 'approved' ? 'Approved successfully!' : 'Declined successfully!';
+    const { id, action, petName } = confirmConfig;
+    const actionVerb = action === 'approve' ? 'Approve' : 'Decline';
+    const successMsg = action === 'approve' ? 'Request Approved!' : 'Request Declined!';
+    const variant = action === 'approve' ? 'success' : 'danger';
 
     try {
-      await axios.delete(`http://localhost:8000/api/adopts/${requestIdToConfirm}`);
-      setRequests(prevRequests =>
-        prevRequests.filter(request => request._id !== requestIdToConfirm)
-      );
+      await axios.delete(`http://localhost:8000/api/adopts/${id}`);
+      setRequests((prev) => prev.filter((req) => req._id !== id));
+      setInfo({
+        title: successMsg,
+        message: `${actionVerb}d the request for ${petName}.`,
+        variant: variant,
+      });
+      setShowInfoModal(true);
     } catch (err) {
-      console.error(`Error ${actionVerb} request:`, err);
-      alert(`Failed to ${actionVerb} request. Please try again.`);
+      console.error(`Failed to ${actionVerb} request:`, err);
+      setInfo({
+        title: 'Error',
+        message: `Failed to ${actionVerb.toLowerCase()} request. Please try again.`,
+        variant: 'danger',
+      });
+      setShowInfoModal(true);
     } finally {
       setShowConfirmModal(false);
-      setActionToConfirm(null);
-      setRequestIdToConfirm(null);
-      setPetNameForModal('');
+      setConfirmConfig({ id: null, action: '', petName: '' });
     }
   };
 
-  const handleCancelAction = () => {
-    setShowConfirmModal(false);
-    setActionToConfirm(null);
-    setRequestIdToConfirm(null);
-    setPetNameForModal('');
-  };
-
-  if (loading) {
-    return (
-      <>
-        <Navigationbar />
-        <div className="loading-message">Loading requests...</div>
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <>
-        <Navigationbar />
-        <div className="error-message">{error}</div>
-      </>
-    );
-  }
-
-  if (requests.length === 0) {
-    return (
-      <>
-        <Navigationbar />
-        <div className="no-requests-message">No adoption requests found.</div>
-      </>
-    );
-  }
+  if (loading) return <><Navigationbar /><div className="loading-message">Loading requests...</div></>;
+  if (error) return <><Navigationbar /><div className="error-message">{error}</div></>;
+  if (requests.length === 0) return <><Navigationbar /><div className="no-requests-message">No adoption requests found.</div></>;
 
   return (
-    <>
-      <Navigationbar />
+  <>
+    <Navigationbar />
+
+    {loading ? (
+      <div className="loading-message">Loading requests...</div>
+    ) : error ? (
+      <div className="error-message">{error}</div>
+    ) : requests.length === 0 ? (
+      <div className="no-requests-message">No adoption requests found.</div>
+    ) : (
       <div className="request-list-container">
         <h2 className="request-list-title">Adoption Requests</h2>
         <div className="table-responsive-container">
@@ -124,20 +116,18 @@ const PetRequestList = () => {
                     </span>
                   </td>
                   <td className="action-buttons-cell">
-                    <>
-                      <button
-                        className="action-button approve-button"
-                        onClick={() => handleRequestAction(request._id, 'approved', request.petsname)}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        className="action-button decline-button"
-                        onClick={() => handleRequestAction(request._id, 'declined', request.petsname)}
-                      >
-                        Decline
-                      </button>
-                    </>
+                    <button
+                      className="action-button approve-button"
+                      onClick={() => handleRequestAction(request._id, 'approve', request.petsname)}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      className="action-button decline-button"
+                      onClick={() => handleRequestAction(request._id, 'decline', request.petsname)}
+                    >
+                      Decline
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -145,39 +135,27 @@ const PetRequestList = () => {
           </table>
         </div>
       </div>
+    )}
 
-      {showConfirmModal && (
-        <div className={`web-modal-overlay ${showConfirmModal ? 'active' : ''}`}>
-          <div className="web-modal-content">
-            <div className="web-modal-header">
-              <h3 className="web-modal-title">
-                {actionToConfirm === 'approved' ? 'Confirm Approval' : 'Confirm Decline'}
-              </h3>
-            </div>
-            <div className="web-modal-body">
-              <p className="web-modal-message">
-                Are you sure you want to <strong>{actionToConfirm === 'approved' ? 'approve' : 'decline'}</strong> the request for <strong>{petNameForModal}</strong>? This action cannot be undone.
-              </p>
-            </div>
-            <div className="web-modal-footer">
-              <button
-                className="web-modal-button button-cancel"
-                onClick={handleCancelAction}
-              >
-                Cancel
-              </button>
-              <button
-                className="web-modal-button button-confirm"
-                onClick={handleConfirmAction}
-              >
-                {actionToConfirm === 'approved' ? 'Approve' : 'Decline'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
+    {/* Confirm Modal (Always Rendered) */}
+    <ConfirmModal
+      show={showConfirmModal}
+      onHide={() => setShowConfirmModal(false)}
+      onConfirm={handleConfirmAction}
+      title={`Confirm ${confirmConfig.action === 'approve' ? 'Approval' : 'Decline'}`}
+      message={`Are you sure you want to ${confirmConfig.action} the request for "${confirmConfig.petName}"?`}
+    />
+
+    {/* Info Modal (Always Rendered) */}
+    <InfoModal
+      show={showInfoModal}
+      onHide={() => setShowInfoModal(false)}
+      title={info.title}
+      message={info.message}
+      variant={info.variant}
+    />
+  </>
+);
 };
 
 export default PetRequestList;

@@ -59,18 +59,20 @@ function AdoptForm() {
         },
       });
       setInfo({
-        title: "Success",
-        message: "Adoption request sent successfully!",
-        variant: "success",
+      title: "Success",
+      message: `Adoption request sent successfully!\n\nWe will reply within 24 hours at ${formData.email}.`,
+      variant: "success",
       });
+
       setShowInfoModal(true);
     } catch (error) {
       console.error("Error:", error.response);
       setInfo({
-        title: "Failed",
-        message: "Submission failed. Please try again.",
-        variant: "danger",
+      title: "Failed",
+      message: `Submission failed. Please try again later or contact us.`,
+       variant: "danger",
       });
+
       setShowInfoModal(true);
     }
   };

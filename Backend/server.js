@@ -9,6 +9,7 @@ const Adopt = require("./Schemas/AdoptSchema");
 const Admin = require("./Schemas/AdminSchema");
 const Users = require("./Schemas/UserSchema");
 const bcrypt = require("bcrypt");
+const nodemailer = require('nodemailer');
 const saltRounds = 10;
 connectDB();
 dotenv.config();
@@ -17,6 +18,13 @@ const PORT = process.env.PORT || 8000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'selvam.s11102005@gmail.com',
+    pass: 'Mallikas@102005' 
+  }
+});
 app.post('/api/users', async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -163,16 +171,37 @@ app.post('/api/admin', async (req, res) => {
 });
 app.post('/api/adopts', async (req, res) => {
   try {
-    const newAdopt = new Adopt({
-      ...req.body
-    });
+    const data = req.body;
+
+    // Save the adoption request to DB
+    const newAdopt = new Adopt(data);
     const savedAdopt = await newAdopt.save();
-    res.status(200).json({ success: true, adoption: savedAdopt });
-  } catch (err) {
-    console.error('Error:', err);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
+
+    // Email setup
+    const mailOptions = {
+      from: 'selvam.s11102005@gmail.com',  // ✅ make sure this matches your transporter
+      to: data.email,
+      subject: 'Adoption Request Received',
+      text: `Hi ${data.fullName},\n\nYour adoption request for ${data.petsname} has been received.\nWe will get back to you within 24 hours.\n\nThank you!\nPet Adoption Team`
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({
+      success: true,
+      message: 'Request submitted & email sent successfully',
+      adoption: savedAdopt
+    });
+  } catch (error) {
+    console.error('Submission or email failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Submission failed or email sending error'
+    });
   }
 });
+
 app.post('/api/pets', async (req, res) => {
   try {
     const newPet = new Pets({
@@ -247,16 +276,17 @@ app.get('/api/adopts/count', async (req, res) => {
 });
 app.delete('/api/adopts/:id', async (req, res) => {
   try {
-    const  id  = req.params;
-     const result = await Adopt.deleteOne({ _id: new ObjectId(id) });
-    
+    const id = req.params.id;
+    const result = await Adopt.deleteOne({ _id: new ObjectId(id) });
+
     if (result.deletedCount === 0) {
-      return res.status(404).json({ success: false, error: 'Pet not found' });
+      return res.status(404).json({ success: false, error: 'Request not found' });
     }
-    res.status(200).json({ message: 'Request deleted successfully' });
+
+    res.status(200).json({ success: true, message: 'Request deleted successfully' });
   } catch (error) {
     console.error('Error deleting request:', error);
-    res.status(500).json({ message: 'Server error while deleting request' });
+    res.status(500).json({ success: false, message: 'Server error while deleting request' });
   }
 });
 app.listen(PORT, () => {

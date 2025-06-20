@@ -3,8 +3,10 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
 import Navigationbar from "../Navigationbar";
-import "./AdoptForm.css";
+import ConfirmModal from "../ConfirmPage/ConfirmModal";
+import InfoModal from "../InfoModal/InfoModal";
 import { useNavigate } from "react-router-dom";
+import "./AdoptForm.css";
 
 function AdoptForm() {
   const [formData, setFormData] = useState({
@@ -30,6 +32,11 @@ function AdoptForm() {
     indoorOutdoor: "",
     petSupervision: "",
   });
+
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [info, setInfo] = useState({ title: "", message: "", variant: "primary" });
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -38,26 +45,40 @@ function AdoptForm() {
     setFormData({ ...formData, [id]: newValue });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    setShowConfirm(true);
+  };
 
+  const handleConfirmSubmit = async () => {
+    setShowConfirm(false);
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/adopts",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          }
-        }
-      );
-      console.log("Response:", response.data);
-      alert(`Request send successfully`);
-      navigate('/home');
+      const response = await axios.post("http://localhost:8000/api/adopts", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setInfo({
+        title: "Success",
+        message: "Adoption request sent successfully!",
+        variant: "success",
+      });
+      setShowInfoModal(true);
     } catch (error) {
-      console.log("Error:", error.response);
-      alert(`Error:404`);
+      console.error("Error:", error.response);
+      setInfo({
+        title: "Failed",
+        message: "Submission failed. Please try again.",
+        variant: "danger",
+      });
+      setShowInfoModal(true);
+    }
+  };
+
+  const handleInfoClose = () => {
+    setShowInfoModal(false);
+    if (info.variant === "success") {
+      navigate("/home");
     }
   };
 
@@ -68,6 +89,7 @@ function AdoptForm() {
         <h2 className="form-title">Pet Adoption Application Form</h2>
 
         <h3>Adopter Information</h3>
+
         <Form.Group className="mb-3" controlId="petsname">
           <Form.Label>Pet Name:</Form.Label>
           <Form.Control
@@ -169,10 +191,29 @@ function AdoptForm() {
             onChange={handleChange}
           />
         </Form.Group>
+
         <Button variant="outline-success" id="gen-btn" type="submit">
           Submit
         </Button>
       </Form>
+
+      {/* Confirm Before Submit */}
+      <ConfirmModal
+        show={showConfirm}
+        onHide={() => setShowConfirm(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirm Submission"
+        message="Are you sure you want to submit the adoption request?"
+      />
+
+      {/* Info Modal for Success or Failure */}
+      <InfoModal
+        show={showInfoModal}
+        onHide={handleInfoClose}
+        title={info.title}
+        message={info.message}
+        variant={info.variant}
+      />
     </>
   );
 }

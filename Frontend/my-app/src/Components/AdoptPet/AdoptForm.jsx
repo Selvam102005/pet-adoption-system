@@ -102,6 +102,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.petsname}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 
@@ -115,6 +116,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.fullName}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 
@@ -128,6 +130,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.age}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 
@@ -141,6 +144,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.gender}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 
@@ -154,6 +158,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.address}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 
@@ -167,6 +172,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.occupation}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 
@@ -180,6 +186,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.phone}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 
@@ -193,6 +200,7 @@ function AdoptForm() {
             autoComplete="off"
             value={formData.email}
             onChange={handleChange}
+            required
           />
         </Form.Group>
 

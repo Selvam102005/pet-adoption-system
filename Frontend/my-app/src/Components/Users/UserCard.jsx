@@ -17,7 +17,6 @@ const UserCard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
   const navigate = useNavigate();
 
@@ -249,13 +248,6 @@ const UserCard = () => {
                       className="auth-input"
                     />
                   </Form.Group>
-                  <Form.Check
-                    type="checkbox"
-                    label="Remember me"
-                    checked={rememberMe}
-                    onChange={() => setRememberMe(!rememberMe)}
-                    className="auth-remember mb-3"
-                  />
                   <Button className="auth-button w-100 mb-3" type="submit" disabled={isLoading}>
                     {isLoading ? "Logging in..." : "Log In"}
                   </Button>

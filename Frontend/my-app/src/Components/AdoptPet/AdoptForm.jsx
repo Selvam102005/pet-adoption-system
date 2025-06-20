@@ -53,7 +53,7 @@ function AdoptForm() {
   const handleConfirmSubmit = async () => {
     setShowConfirm(false);
     try {
-      const response = await axios.post("http://localhost:8000/api/adopts", formData, {
+        await axios.post("http://localhost:8000/api/adopts", formData, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -197,7 +197,6 @@ function AdoptForm() {
         </Button>
       </Form>
 
-      {/* Confirm Before Submit */}
       <ConfirmModal
         show={showConfirm}
         onHide={() => setShowConfirm(false)}
@@ -206,7 +205,6 @@ function AdoptForm() {
         message="Are you sure you want to submit the adoption request?"
       />
 
-      {/* Info Modal for Success or Failure */}
       <InfoModal
         show={showInfoModal}
         onHide={handleInfoClose}

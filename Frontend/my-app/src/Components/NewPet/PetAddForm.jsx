@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Alert from 'react-bootstrap/Alert';
 import axios from 'axios';
-import '../NewPet/PetAddFormStyle.css';
 import Navigationbar from "../Navigationbar";
+import InfoModal from "../InfoModal/InfoModal";
+import ConfirmModal from "../ConfirmPage/ConfirmModal"; 
+import '../NewPet/PetAddFormStyle.css';
 
 function PetAddForm() {
   const [formData, setFormData] = useState({
@@ -24,31 +25,47 @@ function PetAddForm() {
     image: ''
   });
 
-  const [alert, setAlert] = useState({ show: false, message: '', variant: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // ✅ Add state
+  const [info, setInfo] = useState({ title: '', message: '', variant: 'primary' });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  // Trigger confirm modal first
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowConfirmModal(false); // Close confirm modal
     setIsLoading(true);
-    setAlert({ show: false, message: '', variant: '' });
+
     try {
-      const response = await axios.post('http://localhost:8000/api/pets', formData, {
+      await axios.post('http://localhost:8000/api/pets', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      setAlert({ show: true, message: 'Pet added successfully!', variant: 'success' });
+
+      setInfo({
+        title: 'Success',
+        message: 'Pet added successfully!',
+        variant: 'success'
+      });
+      setShowInfoModal(true);
       clearForm();
     } catch (error) {
-      setAlert({ show: true, message: 'Failed to add pet. Please try again.', variant: 'danger' });
+      setInfo({
+        title: 'Failed',
+        message: 'Failed to add pet. Please try again.',
+        variant: 'danger'
+      });
+      setShowInfoModal(true);
     } finally {
       setIsLoading(false);
     }
@@ -77,182 +94,62 @@ function PetAddForm() {
     <>
       <Navigationbar />
       <div className="form-container">
-        {alert.show && <Alert variant={alert.variant}>{alert.message}</Alert>}
         <Form onSubmit={handleSubmit}>
           <h2 style={{ textAlign: 'center' }}>Add Pet Form</h2>
-          <Form.Group className="mb-3">
-            <Form.Label>Pet Name</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="petName"
-              placeholder="Enter Name"
-              value={formData.petName}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Type</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="type"
-              placeholder="Enter Type"
-              value={formData.type}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Breed</Form.Label>
-            <Form.Control
-              type="text"
-              name="breed"
-              className="input"
-              placeholder="Enter Breed"
-              value={formData.breed}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Species</Form.Label>
-            <Form.Control
-              type="text"
-              name="species"
-              className="input"
-              placeholder="Enter Species"
-              value={formData.species}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Age</Form.Label>
-            <Form.Control
-              type="text"
-              name="age"
-              className="input"
-              placeholder="Enter Age"
-              value={formData.age}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Gender</Form.Label>
-            <Form.Control
-              type="text"
-              name="gender"
-              className="input"
-              placeholder="Enter Gender"
-              value={formData.gender}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Origin</Form.Label>
-            <Form.Control
-              type="text"
-              name="origin"
-              className="input"
-              placeholder="Enter Origin"
-              value={formData.origin}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Size</Form.Label>
-            <Form.Control
-              type="text"
-              name="size"
-              className="input"
-              placeholder="Enter Size"
-              value={formData.size}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Weight</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="weight"
-              placeholder="Enter Weight"
-              value={formData.weight}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Temperament</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="temperament"
-              placeholder="Enter Temperament"
-              value={formData.temperament}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Color and Coat Type</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="coat"
-              placeholder="Enter Color and Coat Type"
-              value={formData.coat}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Life-Span</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="lifeSpan"
-              placeholder="Enter Life Span"
-              value={formData.lifeSpan}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Special Characteristics</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="specialCharacteristics"
-              placeholder="Enter Special Characteristics"
-              value={formData.specialCharacteristics}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Pet Image URL</Form.Label>
-            <Form.Control
-              type="text"
-              className="input"
-              name="image"
-              placeholder="Enter Image URL"
-              value={formData.image}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
+
+          {[
+            ['petName', 'Pet Name'],
+            ['type', 'Type'],
+            ['breed', 'Breed'],
+            ['species', 'Species'],
+            ['age', 'Age'],
+            ['gender', 'Gender'],
+            ['origin', 'Origin'],
+            ['size', 'Size'],
+            ['weight', 'Weight'],
+            ['temperament', 'Temperament'],
+            ['coat', 'Color and Coat Type'],
+            ['lifeSpan', 'Life Span'],
+            ['specialCharacteristics', 'Special Characteristics'],
+            ['image', 'Pet Image URL']
+          ].map(([key, label]) => (
+            <Form.Group className="mb-3" key={key}>
+              <Form.Label>{label}</Form.Label>
+              <Form.Control
+                type="text"
+                name={key}
+                className="input"
+                placeholder={`Enter ${label}`}
+                value={formData[key]}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          ))}
+
           <Button variant="primary" type="submit" id="gen-btn" disabled={isLoading}>
             {isLoading ? 'Adding...' : 'Add New Pet'}
           </Button>
         </Form>
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirm Add Pet"
+        message="Are you sure you want to add this pet to the system?"
+      />
+
+      {/* Info Modal */}
+      <InfoModal
+        show={showInfoModal}
+        onHide={() => setShowInfoModal(false)}
+        title={info.title}
+        message={info.message}
+        variant={info.variant}
+      />
     </>
   );
 }

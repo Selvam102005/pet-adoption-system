@@ -1,14 +1,14 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import UserCard from './Components/Users/UserCard';
+import UserCard from './Components/Users/UserCard.jsx';
 import AdminLogin from './Components/Admin/AdminLogin.jsx';
-import Home from './Components/Home';
-import PetAddForm from './Components/NewPet/PetAddForm';
-import DogDetails from './Components/Dogpage/DogDetails';
-import CatDetails from './Components/Catpage/CatDetails';
-import AdoptForm from './Components/AdoptPet/AdoptForm';
+import Home from './Components/Home.jsx';
+import PetAddForm from './Components/NewPet/PetAddForm.jsx';
+import DogDetails from './Components/Dogpage/DogDetails.jsx';
+import CatDetails from './Components/Catpage/CatDetails.jsx';
+import AdoptForm from './Components/AdoptPet/AdoptForm.jsx';
 import Petrequestlist from './Components/Petrequestlist/Petrequestlist.jsx';
-import Pets from './Components/AllDetails/Pets';
+import Pets from './Components/AllDetails/Pets.jsx';
 import AdminDash from './Components/Admindash/AdminDashboard.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 

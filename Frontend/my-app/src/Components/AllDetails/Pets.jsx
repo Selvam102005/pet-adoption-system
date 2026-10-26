@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Button, Row, Col, Card } from "react-bootstrap";
 import { MdDeleteOutline } from "react-icons/md";
@@ -8,6 +7,8 @@ import UpdatePetModal from "./UpdatePetModal";
 import Navigationbar from "../Navigationbar";
 import ConfirmModal from "../ConfirmPage/ConfirmModal"; 
 import './styles.css';
+import { deletePet, getPets } from "../../api/pets";
+import { getAdminToken } from "../../utils/authStorage";
 
 const Pets = () => {
   const [pets, setPets] = useState([]);
@@ -33,8 +34,7 @@ const Pets = () => {
   };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/petdata")
+    getPets()
       .then((response) => setPets(response.data))
       .catch((error) => console.error(error));
   }, []);
@@ -46,11 +46,7 @@ const Pets = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/pets/delete/${confirmDeleteId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete pet');
+      await deletePet(confirmDeleteId, getAdminToken());
 
       setPets(pets.filter(pet => pet._id !== confirmDeleteId));
     } catch (error) {

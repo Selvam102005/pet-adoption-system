@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Alert, Card } from "react-bootstrap";
 import "./UserCard.css";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { loginUser, registerUser } from "../../api/auth";
+import { saveUserSession } from "../../utils/authStorage";
 
 const UserCard = () => {
   const [formData, setFormData] = useState({
@@ -77,9 +78,7 @@ const UserCard = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/api/users", formData, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await registerUser(formData);
 
       if (response.data.success) {
         setFieldErrors({ username: "", email: "" });
@@ -117,15 +116,13 @@ const UserCard = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/api/users/login", {
+      const response = await loginUser({
         email: userEmail,
         password: userPassword
-      }, {
-        headers: { "Content-Type": "application/json" },
       });
 
       if (response.data.success) {
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        saveUserSession(response.data);
         setUserEmail("");
         setUserPassword("");
         navigate("/home");

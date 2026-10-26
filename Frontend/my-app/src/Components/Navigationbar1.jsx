@@ -2,15 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Dropdown from "react-bootstrap/Dropdown";
 import Nav from "react-bootstrap/Nav";
-import axios from "axios";
 import './NavigationBar1style.css';
+import { getPets } from "../api/pets";
 
 const Navigationbar1 = () => {
   const [pets, setPets] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/petdata")
+    getPets()
       .then((response) => {
         setPets(response.data);
       })

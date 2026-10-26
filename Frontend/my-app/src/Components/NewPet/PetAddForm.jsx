@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import axios from 'axios';
 import Navigationbar from "../Navigationbar";
 import InfoModal from "../InfoModal/InfoModal";
 import ConfirmModal from "../ConfirmPage/ConfirmModal"; 
+import { createPet } from "../../api/pets";
+import { getAdminToken } from "../../utils/authStorage";
 import '../NewPet/PetAddFormStyle.css';
 
 function PetAddForm() {
@@ -46,11 +47,7 @@ function PetAddForm() {
     setIsLoading(true);
 
     try {
-      await axios.post('http://localhost:8000/api/pets', formData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      await createPet(formData, getAdminToken());
 
       setInfo({
         title: 'Success',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import axios from "axios";
+import { updatePet } from "../../api/pets";
+import { getAdminToken } from "../../utils/authStorage";
 
 const UpdatePetModal = ({ show, onHide, pet, onUpdate }) => {
   const [petData, setPetData] = useState(pet);
@@ -17,10 +18,7 @@ const UpdatePetModal = ({ show, onHide, pet, onUpdate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
-        `http://localhost:8000/api/pets/update/${petData._id}`,
-        petData
-      );
+      const response = await updatePet(petData._id, petData, getAdminToken());
       if (response.status === 200) {
         onUpdate(petData);
         onHide();

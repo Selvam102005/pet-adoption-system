@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import axios from "axios";
 import Navigationbar from "../Navigationbar";
 import ConfirmModal from "../ConfirmPage/ConfirmModal";
 import InfoModal from "../InfoModal/InfoModal";
 import { useNavigate } from "react-router-dom";
 import "./AdoptForm.css";
+import { createAdoption } from "../../api/adoptions";
+import { getUserToken } from "../../utils/authStorage";
 
 function AdoptForm() {
   const [formData, setFormData] = useState({
@@ -53,11 +54,10 @@ function AdoptForm() {
   const handleConfirmSubmit = async () => {
     setShowConfirm(false);
     try {
-        await axios.post("http://localhost:8000/api/adopts", formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await createAdoption(
+        { ...formData, petName: formData.petsname },
+        getUserToken()
+      );
       setInfo({
       title: "Success",
       message: `Adoption request sent successfully!\n\nWe will reply within 24 hours at ${formData.email}.`,

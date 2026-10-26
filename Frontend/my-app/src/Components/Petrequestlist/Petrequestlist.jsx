@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import './PetRequestList.css';
 import Navigationbar from "../Navigationbar";
 import ConfirmModal from "../ConfirmPage/ConfirmModal";
 import InfoModal from "../InfoModal/InfoModal";
+import { deleteAdoption, getAdoptions } from "../../api/adoptions";
+import { getAdminToken } from "../../utils/authStorage";
 
 const PetRequestList = () => {
   const [requests, setRequests] = useState([]);
@@ -26,8 +27,7 @@ const PetRequestList = () => {
   const fetchRequests = () => {
     setLoading(true);
     setError(null);
-    axios
-      .get("http://localhost:8000/api/adopts")
+    getAdoptions(getAdminToken())
       .then((res) => {
         setRequests(res.data.adoptRequests || []);
         setLoading(false);
@@ -39,8 +39,8 @@ const PetRequestList = () => {
       });
   };
 
-  const handleRequestDelete = (id, petsname) => {
-    setConfirmConfig({ id, petName: petsname || 'this pet' });
+  const handleRequestDelete = (id, petName) => {
+    setConfirmConfig({ id, petName: petName || 'this pet' });
     setShowConfirmModal(true);
   };
 
@@ -48,7 +48,7 @@ const PetRequestList = () => {
     const { id, petName } = confirmConfig;
 
     try {
-      await axios.delete(`http://localhost:8000/api/adopts/${id}`);
+      await deleteAdoption(id, getAdminToken());
       setRequests((prev) => prev.filter((req) => req._id !== id));
       setInfo({
         title: 'Request Deleted',
@@ -94,7 +94,7 @@ const PetRequestList = () => {
             <tbody>
               {requests.map((request) => (
                 <tr key={request._id}>
-                  <td>{request.petsname || "-"}</td>
+                  <td>{request.petName || "-"}</td>
                   <td>{request.fullName || "-"}</td>
                   <td>{request.email || "-"}</td>
                   <td>{request.phone || "-"}</td>
@@ -102,7 +102,7 @@ const PetRequestList = () => {
                   <td className="action-buttons-cell">
                     <button
                       className="action-button delete-button"
-                      onClick={() => handleRequestDelete(request._id, request.petsname)}
+                      onClick={() => handleRequestDelete(request._id, request.petName)}
                     >
                       Delete
                     </button>

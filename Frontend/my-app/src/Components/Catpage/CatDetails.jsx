@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Navigationbar from '../Navigationbar';
 import { Container, Row } from 'react-bootstrap';
-import axios from 'axios';
 import CatCard from './CatCard';
+import { getPets } from '../../api/pets';
 
 const CatDetails = () => {
   const { id } = useParams();
@@ -11,8 +11,7 @@ const CatDetails = () => {
   const catRefs = useRef({});
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/petdata")
+    getPets()
       .then((response) => {
         setCatData(response.data);
       })

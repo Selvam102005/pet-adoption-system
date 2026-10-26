@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import './AdminHome.css';
+import { getAdoptionCount } from "../../api/adoptions";
+import { getPetCount } from "../../api/pets";
+import { getAdminToken } from "../../utils/authStorage";
 
 const AdminHome = () => {
   const adminData = JSON.parse(localStorage.getItem('admin')) || {};
@@ -15,12 +17,11 @@ const AdminHome = () => {
     const fetchStats = async () => {
       try {
         // Make parallel API calls with authentication if needed
-        const token = localStorage.getItem('adminToken');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const token = getAdminToken();
         
         const [petsResponse, requestsResponse] = await Promise.all([
-          axios.get('http://localhost:8000/api/pets/count', { headers }),
-          axios.get('http://localhost:8000/api/adopts/count', { headers })
+          getPetCount(token),
+          getAdoptionCount(token)
         ]);
 
         setStats({

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Alert, Card, Nav } from "react-bootstrap";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { loginAdmin, registerAdmin } from "../../api/auth";
+import { saveAdminSession } from "../../utils/authStorage";
 
 const AdminLogin = () => {
   const [activeTab, setActiveTab] = useState("login");
@@ -48,19 +49,10 @@ const AdminLogin = () => {
     }
     
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/admin/login",
-        { email: adminEmail, password: adminPassword },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await loginAdmin({ email: adminEmail, password: adminPassword });
       
       if (response.data.success) {
-       const { id, name, email } = response.data.admin;
-       localStorage.setItem("admin", JSON.stringify({ id, name, email }));
+       saveAdminSession(response.data);
 
       navigate("/Admindash");
       } else {
@@ -156,19 +148,11 @@ const AdminLogin = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/admin/register",
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await registerAdmin({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
       if (response.data.success) {
         setAlert({
           show: true,

@@ -1,309 +1,396 @@
+
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const { ObjectId } = require("mongodb");
+const nodemailer = require("nodemailer");
+
+dotenv.config();
+
 const connectDB = require("./connection");
+
 const Pets = require("./Schemas/PetSchema");
 const Adopt = require("./Schemas/AdoptSchema");
 const Admin = require("./Schemas/AdminSchema");
 const Users = require("./Schemas/UserSchema");
-const bcrypt = require("bcrypt");
-const nodemailer = require('nodemailer');
-const saltRounds = 10;
-connectDB();
-dotenv.config();
+
+const protect = require("./middleware/authMiddleware");
+const adminOnly = require("./middleware/authorizationMiddleware");
+const authRoutes = require("./Routes/authRoutes");
+
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 5000;
+
+// ==========================
+// MIDDLEWARE
+// ==========================
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ==========================
+// AUTHENTICATION ROUTES
+// ==========================
+app.use("/api", authRoutes);
+
+// ==========================
+// EMAIL CONFIGURATION
+// ==========================
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'selvam.s11102005@gmail.com',
-    pass: 'ypkn zpsr bdlm lkgu' 
-  }
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
 });
-app.post('/api/users', async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return res.status(400).json({ success: false, error: 'All fields are required' });
+// ==========================
+// GET ALL ADMINS (ADMIN ONLY)
+// ==========================
+app.get("/api/admin", protect, adminOnly, async (req, res) => {
+    try {
+        const admins = await Admin.find().select("-password");
+        return res.status(200).json(admins);
+    } catch (err) {
+        console.error("Error fetching admins:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Database error"
+        });
+    }
+});
+
+// ==========================
+// CREATE ADOPTION REQUEST
+// ==========================
+
+
+app.post("/api/adopts", protect, async (req, res) => {
+  try {
+    const {
+      petName,
+      fullName,
+      age,
+      gender,
+      address,
+      occupation,
+      phone
+    } = req.body;
+
+    // Validate the form fields
+    if (
+      !petName ||
+      !fullName ||
+      age === undefined ||
+      age === null ||
+      age === "" ||
+      !gender ||
+      !address ||
+      !occupation ||
+      !phone
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all adoption form fields"
+      });
     }
 
-    const existingUsername = await Users.findOne({ username });
-    const existingEmail = await Users.findOne({ email });
+    // Get the authenticated user from the verified JWT
+    const user = await Users.findById(req.user.id).select("email");
 
-    let errorMessages = [];
-
-    if (existingUsername) errorMessages.push("Username already taken");
-    if (existingEmail) errorMessages.push("Email already registered");
-
-    if (errorMessages.length > 0) {
-      return res.status(400).json({ success: false, error: errorMessages.join(" and ") });
-    }
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hash = await bcrypt.hash(password, salt);
-
-    const newUser = new Users({ username, email, password: hash });
-    const savedUser = await newUser.save();
-    res.status(201).json({ success: true, user: savedUser });
-  } catch (err) {
-    console.error('Error during registration:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-app.post('/api/users/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    const user = await Users.findOne({ email });
     if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid email or password" });
+      return res.status(401).json({
+        success: false,
+        message: "User not found. Please log in again."
+      });
     }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ success: false, message: "Invalid email or password" });
-    }
-    
-    res.status(200).json({ 
-      success: true, 
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email
-      } 
+
+    // Save identity from the database, not from the request body
+    const adoption = await Adopt.create({
+      userId: user._id,
+      petName,
+      fullName,
+      age,
+      gender,
+      address,
+      occupation,
+      phone,
+      email: user.email
     });
-  } catch (err) {
-    console.error('Error during login:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-app.post('/api/admin/register', async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: 'All fields are required' });
+    // Send confirmation to the email stored in the account
+    let emailSent = false;
+
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: user.email,
+          subject: "Pet Adoption Application Received",
+          text: `Hello ${fullName},
+
+We have received your adoption application for ${petName}.
+
+Our team will review your application and contact you with further updates.
+
+Thank you for using our Pet Adoption System!`
+        });
+
+        emailSent = true;
+      } catch (emailError) {
+        console.error("Email sending failed:", emailError);
+      }
     }
 
-    const existingAdminEmail = await Admin.findOne({ email });
-    const existingAdminName = await Admin.findOne({ name });
-
-    const errorMessages = [];
-    if (existingAdminName) errorMessages.push("Name already taken");
-    if (existingAdminEmail) errorMessages.push("Email already registered");
-
-    if (errorMessages.length > 0) {
-      return res.status(400).json({ success: false, message: errorMessages.join(" and ") });
-    }
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const newAdmin = new Admin({ name, email, password: hashedPassword });
-    const savedAdmin = await newAdmin.save();
-    const adminResponse = {
-      id: savedAdmin._id,
-      name: savedAdmin.name,
-      email: savedAdmin.email,
-    };
-    res.status(201).json({ success: true, admin: adminResponse, message: 'Admin registered successfully' });
-  } catch (err) {
-    console.error('Error during admin registration:', err);
-    res.status(500).json({ success: false, message: 'Server error. Please try again.' });
-  }
-});
-
-app.post('/api/admin/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const admin = await Admin.findOne({ email });
-    if (!admin) {
-      return res.status(400).json({ success: false, message: "Invalid admin credentials" });
-    }
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(400).json({ success: false, message: "Invalid admin credentials" });
-    }
-    res.status(200).json({ 
-      success: true, 
-      admin: {
-        id: admin._id,
-        name: admin.name,
-        email: admin.email
-      } 
-    });
-  } catch (err) {
-    console.error('Error during admin login:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-app.get('/api/admin', async (req, res) => {
-  try {
-    const data = await Admin.find();
-    res.status(200).json(data);
-  } catch (err) {
-    console.error('Database error:', err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-app.post('/api/admin', async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-    
-    if (!username || !email || !password) {
-      return res.status(400).json({ success: false, error: 'All fields are required' });
-    }
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hash = await bcrypt.hash(password, salt);
-    const newAdmin = new Admin({
-      username,
-      email,
-      password: hash
-    });
-    const savedAdmin = await newAdmin.save();
-    res.status(201).json({ success: true, admin: savedAdmin });
-  } catch (err) {
-    console.error('Error creating admin:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-app.post('/api/adopts', async (req, res) => {
-  try {
-    const data = req.body;
-
-    // Save the adoption request to DB
-    const newAdopt = new Adopt(data);
-    const savedAdopt = await newAdopt.save();
-
-    // Email setup
-    const mailOptions = {
-      from: 'selvam.s11102005@gmail.com',  
-      to: data.email,
-      subject: 'Adoption Request Received – Pet Adoption Team',
-      text: `Hi ${data.fullName},
-
-Thank you for submitting your adoption request for ${data.petsname}.
-
-We’ve received your request, and our team will review it shortly. You can expect a response within 24 hours.
-
-If you have any questions in the meantime, feel free to contact us:
-
-📍 Location: Chennai, Tamil Nadu  
-📧 Email: sachin@102005gmail.com  
-📞 Phone: +91 88381 07424  
-📠 Fax: +91 75502 62403
-
-Warm regards,  
-Pet Adoption Team
-`
-    };
-
-    // Send the email
-    await transporter.sendMail(mailOptions);
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: 'Request submitted & email sent successfully',
-      adoption: savedAdopt
+      message: "Adoption application submitted successfully",
+      adoption,
+      emailSent
     });
+
   } catch (error) {
-    console.error('Submission or email failed:', error);
-    res.status(500).json({
+    console.error("Adoption submission error:", error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Submission failed or email sending error'
+      message: "Failed to submit adoption application"
     });
   }
 });
 
-app.post('/api/pets', async (req, res) => {
-  try {
-    const newPet = new Pets({
-      ...req.body
-    });
-    const savedPet = await newPet.save();
-    res.status(200).json({ success: true, pet: savedPet });
-  } catch (err) {
-    console.error('Error creating pet:', err);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-});
-app.get('/api/adopts', async (req, res) => {
-  try {
-    const adoptRequests = await Adopt.find();
-    res.status(200).json({ success: true, adoptRequests });
-  } catch (err) {
-    console.error('Error fetching adoption requests:', err);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-});
-app.get('/api/petdata', async (req, res) => {
-  try {
-    const data = await Pets.find();
-    res.status(200).json(data);
-  } catch (err) {
-    console.error('Database error:', err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-app.delete('/api/pets/delete/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await Pets.deleteOne({ _id: new ObjectId(id) });
-    
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ success: false, error: 'Pet not found' });
-    }
-    res.status(200).json({ success: true, message: 'Pet deleted successfully' });
-  } catch (err) {
-    console.error('Error deleting pet:', err);
-    res.status(500).json({ success: false, error: 'Database error' });
-  }
-});
-app.put('/api/pets/update/:id', async (req, res) => {
-  try {
-    const updatedPet = await Pets.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedPet) {
-      return res.status(404).json({ success: false, message: 'Pet not found' });
-    }
-    res.json({ success: true, pet: updatedPet });
-  } catch (error) {
-    console.error('Error updating pet:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-app.get('/api/pets/count', async (req, res) => {
-  try {
-    const count = await Pets.countDocuments();
-    res.json({ success: true, count });
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
-});
-app.get('/api/adopts/count', async (req, res) => {
-  try {
-    const count = await Adopt.countDocuments();
-    res.json({ success: true, count });
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
-});
-app.delete('/api/adopts/:id', async (req, res) => {
-  try {
-    const id = req.params.id;
-    const result = await Adopt.deleteOne({ _id: new ObjectId(id) });
 
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ success: false, error: 'Request not found' });
-    }
+// ==========================
+// CREATE PET (ADMIN ONLY)
+// ==========================
+app.post("/api/pets", protect, adminOnly, async (req, res) => {
+    try {
+        const newPet = await Pets.create(req.body);
 
-    res.status(200).json({ success: true, message: 'Request deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting request:', error);
-    res.status(500).json({ success: false, message: 'Server error while deleting request' });
-  }
+        return res.status(201).json({
+            success: true,
+            pet: newPet
+        });
+    } catch (err) {
+        console.error("Error creating pet:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to create pet"
+        });
+    }
 });
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+
+// ==========================
+// GET ALL ADOPTION REQUESTS
+// (ADMIN ONLY)
+// ==========================
+app.get("/api/adopts", protect, adminOnly, async (req, res) => {
+    try {
+        const adoptRequests = await Adopt.find();
+
+        return res.status(200).json({
+            success: true,
+            adoptRequests
+        });
+    } catch (err) {
+        console.error("Error fetching adoption requests:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch adoption requests"
+        });
+    }
 });
+
+// ==========================
+// GET ALL PETS (PUBLIC)
+// ==========================
+app.get("/api/petdata", async (req, res) => {
+    try {
+        const pets = await Pets.find();
+        return res.status(200).json(pets);
+    } catch (err) {
+        console.error("Error fetching pets:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Database error"
+        });
+    }
+});
+
+// ==========================
+// DELETE PET (ADMIN ONLY)
+// ==========================
+app.delete("/api/pets/delete/:id", protect, adminOnly, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid pet ID"
+            });
+        }
+
+        const result = await Pets.deleteOne({
+            _id: new ObjectId(id)
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Pet not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Pet deleted successfully"
+        });
+    } catch (err) {
+        console.error("Error deleting pet:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete pet"
+        });
+    }
+});
+
+// ==========================
+// UPDATE PET (ADMIN ONLY)
+// ==========================
+app.put("/api/pets/update/:id", protect, adminOnly, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid pet ID"
+            });
+        }
+
+        const updatedPet = await Pets.findByIdAndUpdate(
+            id,
+            req.body,
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        if (!updatedPet) {
+            return res.status(404).json({
+                success: false,
+                message: "Pet not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            pet: updatedPet
+        });
+    } catch (err) {
+        console.error("Error updating pet:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update pet"
+        });
+    }
+});
+
+// ==========================
+// PET COUNT (ADMIN ONLY)
+// ==========================
+app.get("/api/pets/count", protect, adminOnly, async (req, res) => {
+    try {
+        const count = await Pets.countDocuments();
+
+        return res.status(200).json({
+            success: true,
+            count
+        });
+    } catch (err) {
+        console.error("Error getting pet count:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get pet count"
+        });
+    }
+});
+
+// ==========================
+// ADOPTION COUNT (ADMIN ONLY)
+// ==========================
+app.get("/api/adopts/count", protect, adminOnly, async (req, res) => {
+    try {
+        const count = await Adopt.countDocuments();
+
+        return res.status(200).json({
+            success: true,
+            count
+        });
+    } catch (err) {
+        console.error("Error getting adoption count:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get adoption count"
+        });
+    }
+});
+
+// ==========================
+// DELETE ADOPTION REQUEST
+// (ADMIN ONLY)
+// ==========================
+app.delete("/api/adopts/:id", protect, adminOnly, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid adoption request ID"
+            });
+        }
+
+        const result = await Adopt.deleteOne({
+            _id: new ObjectId(id)
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Adoption request not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Adoption request deleted successfully"
+        });
+    } catch (err) {
+        console.error("Error deleting adoption request:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete adoption request"
+        });
+    }
+});
+
+// ==========================
+// START SERVER AFTER DB CONNECTS
+// ==========================
+const startServer = async () => {
+    try {
+        await connectDB();
+
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("Failed to start server:", err.message);
+        process.exit(1);
+    }
+};
+
+startServer();

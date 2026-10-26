@@ -1,34 +1,60 @@
+
 const mongoose = require("mongoose");
 
 const AdoptSchema = new mongoose.Schema({
+  // Authenticated user who submitted the application
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+    required: true,
+  },
+
+  // Pet selected for adoption
+  petName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+
+  // Applicant information
   fullName: {
     type: String,
-    required: false,
+    required: true,
+    trim: true,
   },
   age: {
     type: Number,
-    required: false,
+    required: true,
+    min: 1,
   },
   gender: {
     type: String,
-    required: false,
+    required: true,
   },
   address: {
     type: String,
-    required: false,
+    required: true,
+    trim: true,
   },
   occupation: {
     type: String,
-    required: false,
+    required: true,
+    trim: true,
   },
   phone: {
     type: String,
-    required: false,
+    required: true,
+    trim: true,
   },
+
+  // Email should come from the logged-in user's database record
   email: {
     type: String,
-    required: false,
+    required: true,
+    trim: true,
   },
+
+  // Additional adoption details (for future form expansion)
   homeType: {
     type: String,
     required: false,
@@ -84,7 +110,9 @@ const AdoptSchema = new mongoose.Schema({
   agreement: {
     type: Boolean,
     required: false,
-  }
+  },
+}, {
+  timestamps: true,
 });
 
 const Adopt = mongoose.model("Adopt", AdoptSchema);
